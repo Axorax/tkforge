@@ -1,0 +1,15 @@
+# Folders
+
+.env/
+env/
+dist/
+build/
+TkForge/
+__pycache__/
+test/
+
+# Files
+
+main.py
+*.spec
+*.txt
