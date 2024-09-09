@@ -5,7 +5,12 @@ def rgb_to_hex(r, g, b):
     return f"#{int(r*255):02x}{int(g*255):02x}{int(b*255):02x}"
 
 def get_foreground_color(r, g, b):
-    return '#000000' if (r*0.299 + g*0.587 + b*0.114) > 186 else '#ffffff'
+    def linearize(c):
+        c /= 255
+        return c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
+
+    luminance = 0.2126 * linearize(r) + 0.7152 * linearize(g) + 0.0722 * linearize(b)
+    return '#000000' if luminance > 0.179 else '#ffffff'
 
 def write_file(text, out=None, frame=None):
     if out is None:
@@ -25,8 +30,6 @@ def write_file(text, out=None, frame=None):
         file.write(text)
 
 def extract_figma_id(url):
-    url = url.replace('\n', '').replace('\r', '').replace(' ', '')
-
     if url.startswith('http'):
         url = urlparse(url)
         

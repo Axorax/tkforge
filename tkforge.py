@@ -33,7 +33,7 @@ def main():
     file_id, token, output = parse_arguments()
     
     if not file_id or not token:
-        print(Fore.RED + "Provide both arguments id and token")
+        print(Fore.RED + "Provide both arguments id and token. Make sure to wrap URL in quotes(\").")
         return
 
     print(Fore.YELLOW + "Processing...")

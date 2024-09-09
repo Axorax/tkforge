@@ -175,8 +175,8 @@ def clear_file_input(t=True):
         file_input.insert(0, file_input.get_placeholder())
 
 def generate():
-    token = token_input.get().replace(" ", "")
-    file = file_input.get().replace(" ", "")
+    token = token_input.get().strip().replace(' ', '')
+    file = file_input.get().strip().replace(' ', '')
     output = outpath_input.get()
 
     def generate_code_threaded():

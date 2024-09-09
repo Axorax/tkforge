@@ -11,7 +11,7 @@ def get_file(file, token):
     else:
         return response.status_code, response.text
 
-def download_image(file, id, count, token, out=None, frame=None):
+def download_image(file, id, name, token, out=None, frame=None):
     response = requests.get(f"https://api.figma.com/v1/images/{file}", headers={'X-FIGMA-TOKEN': token}, params={'ids': id})
     
     if response.status_code == 200:
@@ -27,7 +27,7 @@ def download_image(file, id, count, token, out=None, frame=None):
             if not os.path.exists(folder_path):
                 os.makedirs(folder_path)
             
-            file_name = f'{count}.png'
+            file_name = f'{name}.png'
             file_path = os.path.join(folder_path, file_name)
             image_response = requests.get(image_url)
 
@@ -87,26 +87,21 @@ def parse_file(file, token, download_images=True, out=None):
                         (i.get('background', [{}])[0].get('color') if i.get('background') else None) or \
                         (i.get('fills', [{}])[0].get('color') if i.get('fills') else "#000000")
                 
-                if bg_color and not bg_color == "#000000":
+                if bg_color and bg_color != "#000000":
                     i['background'] = rgb_to_hex(bg_color['r'], bg_color['g'], bg_color['b'])
                     fg = get_foreground_color(bg_color['r'], bg_color['g'], bg_color['b'])
-
+                    
                     if fg == i['background']:
-                        if fg == '#000000':
-                            i['foreground'] = '#ffffff'
-                        elif fg == '#ffffff':
-                            i['foreground'] = '#000000'
-                        else:
-                            i['foreground'] = fg
+                        i['foreground'] = '#ffffff' if fg == '#000000' else '#000000' if fg == '#ffffff' else fg
                     else:
                         i['foreground'] = fg
                 else:
                     i['background'] = "#000000"
                     i['foreground'] = "#FFFFFF"
 
-                def download(image_count):
+                def download(name):
                     nonlocal i
-                    image = download_image(file, i['id'], image_count, token, out, frame_count) if frame_count > 0 else download_image(file, i['id'], image_count, token, out)
+                    image = download_image(file, i['id'], name, token, out, frame_count) if frame_count > 0 else download_image(file, i['id'], name, token, out)
                     
                     if image:
                         i['image'] = image
@@ -122,6 +117,7 @@ def parse_file(file, token, download_images=True, out=None):
                     style = i.get('style', {})
                     i['font'] = style.get('fontFamily', 'Default Font')
                     i['font_size'] = int(style.get('fontSize', 12))
+                
                 elif type == 'image':
                     parts = i['name'].split(' ')
                     name = " ".join(parts[1:])
@@ -129,23 +125,27 @@ def parse_file(file, token, download_images=True, out=None):
                         download(name)
                     else:
                         image_count += 1
-                        download("image_" + str(image_count))
+                        download(str(image_count))
                     
                 elif type == 'scale':
                     scale = i['name'].split(' ')
                     i['from'] = int(scale[1])
                     i['to'] = int(scale[2])
                     i['orient'] = scale[3] if len(scale) > 3 else "HORIZONTAL"
+                
                 elif type in ['textbox', 'textarea']:
                     parts = i['name'].split(' ')
                     placeholder = " ".join(parts[1:])
 
                     if not placeholder.replace(' ', '') == '':
                         i['placeholder'] = placeholder
+                
                         if type == 'textbox':
                             entry_placeholder = True
+                
                         elif type == 'textarea':
                             text_placeholder = True
+                
                 elif type == 'button' and download_images:
                     image_count += 1
                     download(image_count)
@@ -172,6 +172,7 @@ def parse_file(file, token, download_images=True, out=None):
             ]])
 
         threads = []
+        
         for frame in frames:
             thread = threading.Thread(target=download_images_threaded, args=(frame,))
             threads.append(thread)
