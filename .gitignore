@@ -1,0 +1,16 @@
+# Folders
+
+*env/
+dist/
+test/
+build/
+TkForge/
+__pycache__/
+chocolatey-package/
+
+# Files
+
+*.txt
+!VERSION.txt
+*.spec
+main.py
