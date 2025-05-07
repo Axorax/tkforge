@@ -25,7 +25,7 @@
 
 ## ❓ Why and how?
 
-Something like this has already been done by ParthJadhav with Tkinter Designer but I liked the concept and wanted to make something similar if not better from scratch. TkForge interacts with the Figma API to get the details of the file and turns that into code.
+Something like this has already been done by ParthJadhav with Tkinter Designer but I liked the concept and wanted to make something similar if not better from scratch. TkForge interacts with the Figma API to get the details of the file and turns that into code. You can check my video on it to learn more :)
 
 ## 💻 App Preview
 
